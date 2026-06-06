@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Noto+Serif+JP:wght@400&family=Yuji+Boku&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* color */
+  --color-mainbase: #FFFFFF;
+  --color-subbase: #F2F2F2;
+  --color-point: #524D4D;
+  --color-main: #000000;
+  --color-correct: #0B6423;
+  --color-wrong: #F71D36;
+
+  /* font-family */
+  --font-yuji: "Yuji Boku", serif;
+  --font-kosugi: "Kosugi Maru", sans-serif;
+  --font-jp: "Noto Serif JP", serif;
+}
