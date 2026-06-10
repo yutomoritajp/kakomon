@@ -7,8 +7,8 @@ const Layout = () => {
         <>
           <Header />
             <main>
-              <div className='py-12 bg-subbase'>
-                <div className='w-[clamp(64rem,90%,112rem)] mx-auto p-16 bg-mainbase rounded-md'>
+              <div className="py-12 bg-subbase">
+                <div className="w-[clamp(64rem,90%,112rem)] mx-auto p-16 bg-mainbase rounded-md">
                   <Outlet />
                 </div>
               </div>
