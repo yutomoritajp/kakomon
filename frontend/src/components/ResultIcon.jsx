@@ -1,14 +1,14 @@
-import CorrectIcon from '../assets/correct.svg'
-import WrongIcon from '../assets/wrong.svg'
+import Correct from '../assets/correct.svg'
+import Wrong from '../assets/wrong.svg'
 
-export function Collect() {
+const ResultIcon = ({ isCorrect }) => {
+    const src = isCorrect ? Correct : Wrong;
     return (
-        <img src={CorrectIcon}  />
+        <img src={ src }
+             alt=""
+             className="fixed top-1/3 left-2/5 -translate-x-1/2 -translate-y-1/2
+                animate-fadeout pointer-events-none"/>
     )
 }
 
-export function Wrong() {
-    return (
-        <img src={WrongIcon} />
-    )
-}
+export default ResultIcon

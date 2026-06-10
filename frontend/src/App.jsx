@@ -3,7 +3,7 @@ import { Routes, Route} from 'react-router'
 import Layout from '../src/pages/Layout'
 import Top from '../src/pages/Top'
 import Quiz from '../src/pages/Quiz'
-import Result from '../src/pages/Result'
+import Summary from '../src/pages/Summary'
 import Error from '../src/pages/Error'
 
 function App() {
@@ -14,7 +14,7 @@ function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Top />} />
         <Route path="/quiz" element={<Quiz />} />
-        <Route path="/result" element={<Result />} />
+        <Route path="/summary" element={<Summary />} />
         <Route path="*" element={<Error />} />
       </Route>
     </Routes>
