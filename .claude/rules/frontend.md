@@ -10,6 +10,7 @@ paths: ['frontend/**/*']
 - React 19 / JavaScript（JSX、TypeScriptではない）
 - Vite 8（dev server / ビルド）
 - ESLint（flat config: `eslint.config.js`）
+- Tailwind CSS（v4）
 
 ## コンテナ構成（`compose.yaml` / `frontend/Dockerfile`）
 - ベースイメージ: `node:20-slim`、`WORKDIR /app`、実行ユーザー `node`

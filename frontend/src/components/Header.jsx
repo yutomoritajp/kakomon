@@ -5,7 +5,7 @@ const Header = () => {
     return (
         <header>
             <div className="bg-mainbase">
-                <div className="flex items-center gap-2 p-2">
+                <div className="flex items-center gap-1 p-2">
                     <img src={DbIcon} />
                     <p className="text-point font-kosugi">{ APP_SUB_TITLE }</p>
                 </div>
