@@ -48,3 +48,4 @@ docker compose run --rm frontend npm install <package>
 ## Todoリスト
 
 - TypeScriptへの移行(移行したら`./frontend/jsconfig.json`の設定を変更する。)
+- 問題数上限10問の制約事項を、該当スコープの基本設計書に反映する

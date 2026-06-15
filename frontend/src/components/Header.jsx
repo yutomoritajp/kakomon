@@ -1,5 +1,6 @@
 import DbIcon from '../assets/db.svg'
-import { APP_TITLE, APP_SUB_TITLE, TOP } from '../constants/message.js'
+import { APP_TITLE, APP_SUB_TITLE, BUTTON } from '../constants/message.js'
+import { ROUTE } from '../constants/route'
 
 const Header = () => {
     return (
@@ -14,7 +15,7 @@ const Header = () => {
             <div className="bg-point p-4">
                 <nav>
                     <ul className="text-mainbase text-xl font-jp">
-                        <li className="ml-6"><a href="#">{ TOP }</a></li>
+                        <li className="ml-6"><a href={ROUTE.TOP}>{ BUTTON.TO_TOP }</a></li>
                     </ul>
                 </nav>
             </div>

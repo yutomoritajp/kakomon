@@ -3,6 +3,8 @@ import ExamPeriodCheckbox from '../components/ExamPeriodCheckbox'
 import ExamSectionRadioButton from '../components/ExamSectionRadioButton'
 import QuizCountSelectBox from '../components/QuizCountSelectBox'
 import { MainButton } from '../components/Button'
+import { BUTTON, SELECT_EXAM_PERIOD, SELECT_EXAM_SECTION } from '../constants/message'
+import { ROUTE } from '../constants/route'
 
 const periods = [
   { id: 1, text: "令和7年秋季" },
@@ -22,7 +24,7 @@ const sections = [
   { id: 4, text: "午後Ⅱ"}
 ];
 
-const quizCounts = [1, 3, 5, 10, 20, 30, 40, 50]
+const quizCounts = [ 1, 3, 5, 10 ];
 
 const Top = () => {
     const [checkedPeriods, setCheckedPeriods] = useState(new Set(periods.map(_ => _.id)));
@@ -39,7 +41,7 @@ const Top = () => {
     return (
       <>
         <div className="relative grid grid-cols-3 gap-x-8 gap-y-4 border p-8 rounded-md">
-          <p className="absolute -top-4 left-4 text-xl font-yuji bg-mainbase">試験回を選択</p>
+          <p className="absolute -top-4 left-4 text-xl font-yuji bg-mainbase">{ SELECT_EXAM_PERIOD }</p>
           { periods.map(period => (
             <ExamPeriodCheckbox 
                 key={ period.id }
@@ -50,7 +52,7 @@ const Top = () => {
           )) }
         </div>
         <div className="relative my-16 border p-8 rounded-md">
-          <p className="absolute -top-4 left-4 text-xl font-yuji bg-mainbase">試験区分を選択</p>
+          <p className="absolute -top-4 left-4 text-xl font-yuji bg-mainbase">{ SELECT_EXAM_SECTION }</p>
           { sections.map(section => (
             <ExamSectionRadioButton 
                 key={ section.id }
@@ -64,7 +66,7 @@ const Top = () => {
           <QuizCountSelectBox counts={ quizCounts } setCount={ setQuizCount } />
           <span className="mx-2">問</span>
         </div>
-        <MainButton>出題開始</MainButton>
+        <MainButton to={ ROUTE.QUIZ }>{ BUTTON.START }</MainButton>
       </>
     )
 }

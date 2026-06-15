@@ -1,3 +1,5 @@
+import { HYPHEN } from '../constants/message'
+
 /**
  * @param { object } props
  * @param { number[] } props.counts 問題数候補リスト
@@ -12,9 +14,8 @@ const QuizCountSelectBox = ({ counts, setCount }) => {
             { [0, ...counts].map(count => (
                 <option 
                     key={ count }
-                    value={ count }
-                    onChange={ () => setCount(count) } >{ count == 0 ? "-" : count }</option>
-            )) }
+                    value={ count }>{ count == 0 ? HYPHEN : count }</option>
+            ))}
           </select>
         </>
     )

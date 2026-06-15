@@ -6,7 +6,7 @@ const ResultIcon = ({ isCorrect }) => {
     return (
         <img src={ src }
              alt=""
-             className="fixed top-1/3 left-2/5 -translate-x-1/2 -translate-y-1/2
+             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
                 animate-fadeout pointer-events-none"/>
     )
 }
