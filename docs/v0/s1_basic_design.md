@@ -30,4 +30,4 @@ AIに質問機能はスコープ外のため、「AIに質問する」ボタン�
 
 1. React環境を作成
   - [こちら](https://zenn.dev/yutomoritajp/articles/87097a5be2012b)の記事を参考に、Docker×React環境を作成。
-  - 画面作成。
+2. 画面作成（画面遷移できるようにする）
