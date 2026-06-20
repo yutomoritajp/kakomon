@@ -25,7 +25,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./db/data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -35,3 +35,4 @@ services:
 
 volumes:
   react_node_modules:
+  postgres_data:
