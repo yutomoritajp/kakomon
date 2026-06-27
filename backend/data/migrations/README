@@ -1,0 +1,75 @@
+# マイグレーション手順
+
+## 1. モデル編集
+
+`../models.py`にてモデルの作成や削除などを実施。
+
+## 2. マイグレーションファイル作成
+
+下記コマンドを実行。
+
+```
+docker compose exec backend uv run alembic revision --autogenerate -m {マイグレーション名}
+```
+
+補足
+- `--autogenerate`: 現在のSQLModelのモデル定義とDBの実際のスキーマを比較して、差分を自動でマイグレーションファイルに書き出す。
+- {マイグレーション名}は""(ダブルクォーテーション)で囲む。（例："create init tables"）
+- {リビジョンID}_{マイグレーション名}.py でマイグレーションファイルが作成される。
+
+
+`versions/`配下に新規マイグレーションファイルが作成される。意図したマイグレーションファイルが作成されているかを必ず確認すること。
+
+## 3. マイグレーション実行
+
+下記コマンドを実行。
+
+<最後のマイグレーションファイルまで実行する>
+
+```
+docker compose exec backend uv run alembic upgrade head
+```
+
+<任意のマイグレーションファイルまで実行する>
+
+```
+docker compose exec backend uv run alembic upgrade {リビジョンID}
+```
+
+<現在地から1つだけ進める>
+
+```
+docker compose exec backend uv run alembic upgrade +1
+```
+
+## 4. ロールバック
+
+下記コマンドを実行。
+
+<直近の1つだけ取り消す>
+
+```
+docker compose exec backend uv run alembic downgrade -1
+```
+
+<指定したリビジョンまで戻す>
+
+```
+docker compose exec backend uv run alembic downgrade {リビジョンID}
+```
+
+<全マイグレーションを取り消して空の状態に戻す>
+
+```
+docker compose exec backend uv run alembic downgrade base
+```
+
+## 5. その他
+
+`alembic_version`テーブルに現時点でマイグレーションがどこまで実行されているかが記載されている。(リビジョンIDが入る)
+
+下記コマンドで現在どのリビジョンまで適用済みかを確認できる。
+
+```
+docker compose exec backend uv run alembic current
+```

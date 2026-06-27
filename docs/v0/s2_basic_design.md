@@ -95,7 +95,7 @@ erDiagram
 quizzes {
     integer id PK
     integer exam_id FK
-    smallint number "問題番号"
+    integer number "問題番号"
     text content "Markdown形式の問題文テキスト"
 }
 
@@ -118,7 +118,7 @@ sections {
 options {
     integer id PK
     integer quiz_id FK
-    smallint sort_order "選択肢の順序（1=ア, 2=イ, 3=ウ, 4=エ）"
+    integer sort_order "選択肢の順序（1=ア, 2=イ, 3=ウ, 4=エ）"
     bool correct_flag "正解フラグ（true: 正解, false: 不正解）"
 }
 
