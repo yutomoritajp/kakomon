@@ -86,7 +86,6 @@
 
 ``` mermaid
 erDiagram
-  quizzes ||--|{ options: "1つの問題が4つの選択肢をもつ"
   quizzes ||--o| commentaries : "1つの問題が1つの解説を持つ"
   quizzes ||--|| exams: "1つの問題が1つの試験情報をもつ"
   periods ||--o{ exams: "1つの試験回が複数の試験情報に使用される"
@@ -97,6 +96,7 @@ quizzes {
     integer exam_id FK
     integer number "問題番号"
     text content "Markdown形式の問題文テキスト"
+    integer correct_option "正解の選択肢（0=ア, 1=イ, 2=ウ, 3=エ）"
 }
 
 exams {
@@ -113,13 +113,6 @@ periods {
 sections {
     integer id PK
     varchar name "試験区分（例：午前Ⅱ）"
-}
-
-options {
-    integer id PK
-    integer quiz_id FK
-    integer sort_order "選択肢の順序（1=ア, 2=イ, 3=ウ, 4=エ）"
-    bool correct_flag "正解フラグ（true: 正解, false: 不正解）"
 }
 
 commentaries {
