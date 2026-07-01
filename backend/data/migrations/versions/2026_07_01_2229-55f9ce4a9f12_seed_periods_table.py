@@ -1,8 +1,8 @@
 """seed_periods_table
 
-Revision ID: fdcbf21378ac
-Revises: 86f3e7271055
-Create Date: 2026-07-01 02:39:13.091766
+Revision ID: 55f9ce4a9f12
+Revises: 24df08932870
+Create Date: 2026-07-01 22:29:51.692302
 
 """
 from typing import Sequence, Union
@@ -13,10 +13,11 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'fdcbf21378ac'
-down_revision: Union[str, Sequence[str], None] = '86f3e7271055'
+revision: str = '55f9ce4a9f12'
+down_revision: Union[str, Sequence[str], None] = '24df08932870'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
+
 
 periods_table = sa.table(
     "periods",
