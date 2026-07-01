@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field
-from sqlalchemy import CheckConstraint
+from sqlalchemy import CheckConstraint, UniqueConstraint
 
 class Quiz(SQLModel, table=True):
     __tablename__ = "quizzes"
@@ -14,19 +14,24 @@ class Quiz(SQLModel, table=True):
 
 class Exam(SQLModel, table=True):
     __tablename__ = "exams"
+    __table_args__ = (
+        UniqueConstraint("period_code", "section_code", name="uix_period_section"),
+    )
     id: int | None = Field(default=None, primary_key=True)
-    period_id: int = Field(foreign_key="periods.id")
-    section_id: int = Field(foreign_key="sections.id")
+    period_code: str = Field(foreign_key="periods.code")
+    section_code: str = Field(foreign_key="sections.code")
 
 class Period(SQLModel, table=True):
     __tablename__ = "periods"
-    id: int | None = Field(default=None, primary_key=True)
-    name: str = Field(unique=True, sa_column_kwargs={"comment": "試験回（例：令和7年秋）"})
+    code: str = Field(primary_key=True, sa_column_kwargs={"comment": "試験回識別子（例：R7）"})
+    name: str = Field(unique=True, sa_column_kwargs={"comment": "試験回表示名（例：令和7年度）"})
+    sort_order: int = Field(unique=True, sa_column_kwargs={"comment": "並び順"})
 
 class Section(SQLModel, table=True):
     __tablename__ = "sections"
-    id: int | None = Field(default=None, primary_key=True)
-    name: str = Field(unique=True, sa_column_kwargs={"comment": "試験区分（例：午前Ⅱ）"})
+    code: str = Field(primary_key=True, sa_column_kwargs={"comment": "試験区分識別子（例：am2）"})
+    name: str = Field(unique=True, sa_column_kwargs={"comment": "試験区分表示名（例：午前Ⅱ）"})
+    sort_order: int = Field(unique=True, sa_column_kwargs={"comment": "並び順"})
 
 class Commentary(SQLModel, table=True):
     __tablename__ = "commentaries"

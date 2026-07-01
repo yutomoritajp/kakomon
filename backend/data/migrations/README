@@ -73,3 +73,80 @@ docker compose exec backend uv run alembic downgrade base
 ```
 docker compose exec backend uv run alembic current
 ```
+
+# シーディングファイル作成手順
+
+## 1. 空のマイグレーションファイルを作成
+
+下記コマンドを実行。
+
+```
+docker compose exec backend uv run alembic revision -m {ファイル名}
+```
+
+補足
+- ファイル名は"seed_..."とする。
+- {ファイル名}は""(ダブルクォーテーション)で囲む。（例: "seed_sections_table"）
+
+## 2. シーディング内容を追記
+
+1で空のマイグレーションファイルが作成されるので、中身を書いていく。
+
+### データ挿入するテーブルを定義
+
+挿入対象のカラムのみ定義する。ここで型を定義することで、挿入する値を正しい型で扱う（バインドする）ことができる。
+
+```
+sections_table = sa.table(
+    "sections",
+    sa.column("name", sa.String),
+    sa.column("code", sa.String),
+    sa.column("sort_order", sa.Integer)
+)
+```
+
+### upgrade()に追記
+
+下記のようにbulk_insertを使用することでデータを挿入することができる。
+
+```
+def upgrade() -> None:
+    """Upgrade schema."""
+    op.bulk_insert(
+        sections_table,
+        [
+            {
+                "name": "午前Ⅰ",
+                "code": "am1",
+                "sort_order": 1
+            },
+            {
+                "name": "午前Ⅱ",
+                "code": "am2",
+                "sort_order": 2
+            },
+            {
+                "name": "午後Ⅰ",
+                "code": "pm1",
+                "sort_order": 3
+            },
+            {
+                "name": "午後Ⅱ",
+                "code": "pm2",
+                "sort_order": 4
+            }
+        ]
+    )
+```
+
+### downgrade()に追記
+
+upgrade()で追加したデータを削除する生SQLを記載する。
+
+```
+op.execute("DELETE FROM sections WHERE code IN ('am1', 'am2', 'pm1', 'pm2')")
+```
+
+## 3. マイグレーション実行
+
+作成した seed ファイルは、上記「3. マイグレーション実行」の手順（`alembic upgrade head` 等）で適用する。

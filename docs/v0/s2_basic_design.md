@@ -101,18 +101,20 @@ quizzes {
 
 exams {
     integer id PK
-    integer period_id FK
-    integer section_id FK
+    varchar period_code FK
+    varchar section_code FK
 }
 
 periods {
-    integer id PK
-    varchar name "試験回（例：令和7年秋）"
+    varchar code PK "試験回識別子（例：R7）"
+    varchar name "試験回表示名（例：令和7年秋）"
+    integer sort_order "並び順"
 }
 
 sections {
-    integer id PK
-    varchar name "試験区分（例：午前Ⅱ）"
+    varchar code PK "試験区分識別子（例：am2）"
+    varchar name "試験区分表示名（例：午前Ⅱ）"
+    integer sort_order "並び順"
 }
 
 commentaries {
