@@ -8,7 +8,46 @@
 
 ## 設計
 
-### 過去問情報の保存方法について
+### 過去問データの作成方法について
+
+`quizzes`テーブルに格納する`number`, `content`, `correct_option`はbatch処理 + LLM APIで作成する。
+成果物として`exams`テーブルと`quizzes`テーブルにデータが格納されるシーディングファイルが作成される。
+
+#### 大まかな処理の流れと責務
+
+1. 元データとなるpdfファイルをストレージから取得する。（batch処理）
+2. pdfから必要な情報を切り出し、APIを呼ぶ。(batch処理)
+3. 問題文のテキストを受け取り、成形して返す。（LLM API）
+   ※LLMへの入力形式（テキストのみ / 画像同梱 / PDF同梱）は精度に依存するため実装時に検証して決定する。
+4. 画像をストレージに保存する。（batch処理）
+
+```mermaid
+---
+title: 処理イメージ(Todo:実装が確定したらこの図を実装に合わせて修正する)
+---
+sequenceDiagram
+participant User
+participant Batch
+participant Storage
+participant Api
+
+User ->> Batch: period_code, section_code
+Batch ->> Storage: period_code, section_code
+Storage -->> Batch: question.pdf, answer.pdf
+loop 問題数分ループする
+Batch ->> Batch: 問題ごとにpdfを分割し問題部全体を画像に変換
+Batch ->> Batch: 文字列はテキスト化/表・図は画像変換
+Batch ->> Api: 全体画像/文字列/図・表の画像
+Api ->> Api: 全体画像から整形されたマークダウンを作成
+Api -->> Batch: 問題部text
+end
+Batch ->> Batch: シーディングファイル作成
+Batch -->> User: 完了通知
+
+```
+
+
+#### 元データの格納場所について
 
 過去問のpdfファイルは以下のように格納しておく。
 
@@ -26,15 +65,7 @@
             ├── r6
 ```
 
-pdfファイルを読み込み`quizzes`テーブルへデータを格納するシーディングファイルを作成するClaudeCodeの`SKILL`を作成する。
-
-#### シーディングファイルを作成するSKILLについて
-
-このスキルは以下を行う。
-
-1. `quizzes`テーブル内のデータのみ
-
-### 画像データ保存場所について
+#### 画像データ保存場所について
 
 問題文及び選択肢が「図」や「グラフ」だった場合、画像データとして保持する必要がある。どのような画像をどのように保存するかについて記載する。
 
@@ -46,8 +77,8 @@ pdfファイルを読み込み`quizzes`テーブルへデータを格納する�
 ├── backend/
     ├── data/
         ├── storage/
-            ├── R7/
-            |   ├── AM_1/
+            ├── r7/
+            |   ├── am1/
             |   |   ├── questions/
             |   |   |   ├── 3/
             |   |   |       ├── 1.png
@@ -55,11 +86,10 @@ pdfファイルを読み込み`quizzes`テーブルへデータを格納する�
             |   |   ├── commentaries/
             |   |       ├── 1/
             |   |           └── 1.png
-            |   ├── AM_2/
-            ├── R6/
-            ├── R5/
+            |   ├── am2/
+            ├── r6/
+            ├── r5/
 ```
-#### 詳細
 
 画像データはpngとする。（1問あたり画像ファイルは10枚未満になる想定。）
 画像ファイル名は、その問題・解説に出てくる順番で命名する。（1つ目の画像なら、`1.png`）
