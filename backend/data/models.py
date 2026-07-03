@@ -23,7 +23,7 @@ class Exam(SQLModel, table=True):
 
 class Period(SQLModel, table=True):
     __tablename__ = "periods"
-    code: str = Field(primary_key=True, sa_column_kwargs={"comment": "試験回識別子（例：R7）"})
+    code: str = Field(primary_key=True, sa_column_kwargs={"comment": "試験回識別子（例：r7）"})
     name: str = Field(unique=True, sa_column_kwargs={"comment": "試験回表示名（例：令和7年度）"})
     sort_order: int = Field(unique=True, sa_column_kwargs={"comment": "並び順"})
 

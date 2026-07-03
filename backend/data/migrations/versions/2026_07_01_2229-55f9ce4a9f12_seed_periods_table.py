@@ -33,87 +33,87 @@ def upgrade() -> None:
         [
             {
                 "name": "令和7年度",
-                "code": "R7",
+                "code": "r7",
                 "sort_order": 100
             },
             {
                 "name": "令和6年度",
-                "code": "R6",
+                "code": "r6",
                 "sort_order": 101
             },
             {
                 "name": "令和5年度",
-                "code": "R5",
+                "code": "r5",
                 "sort_order": 102
             },
             {
                 "name": "令和4年度",
-                "code": "R4",
+                "code": "r4",
                 "sort_order": 103
             },
             {
                 "name": "令和3年度",
-                "code": "R3",
+                "code": "r3",
                 "sort_order": 104
             },
             {
                 "name": "令和2年度",
-                "code": "R2",
+                "code": "r2",
                 "sort_order": 105
             },
             {
                 "name": "令和元年度",
-                "code": "R1",
+                "code": "r1",
                 "sort_order": 106
             },
             {
                 "name": "平成30年度",
-                "code": "H30",
+                "code": "h30",
                 "sort_order": 107
             },
             {
                 "name": "平成29年度",
-                "code": "H29",
+                "code": "h29",
                 "sort_order": 108
             },
             {
                 "name": "平成28年度",
-                "code": "H28",
+                "code": "h28",
                 "sort_order": 109
             },
             {
                 "name": "平成27年度",
-                "code": "H27",
+                "code": "h27",
                 "sort_order": 110
             },
             {
                 "name": "平成26年度",
-                "code": "H26",
+                "code": "h26",
                 "sort_order": 111
             },
             {
                 "name": "平成25年度",
-                "code": "H25",
+                "code": "h25",
                 "sort_order": 112
             },
             {
                 "name": "平成24年度",
-                "code": "H24",
+                "code": "h24",
                 "sort_order": 113
             },
             {
                 "name": "平成23年度",
-                "code": "H23",
+                "code": "h23",
                 "sort_order": 114
             },
             {
                 "name": "平成22年度",
-                "code": "H22",
+                "code": "h22",
                 "sort_order": 115
             },
             {
                 "name": "平成21年度",
-                "code": "H21",
+                "code": "h21",
                 "sort_order": 116
             }
         ]
@@ -122,4 +122,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.execute("DELETE FROM periods WHERE code IN ('R7', 'R6', 'R5', 'R4', 'R3', 'R2', 'R1', 'H30', 'H29', 'H28', 'H27', 'H26', 'H25', 'H24', 'H23', 'H22', 'H21')")
+    op.execute("DELETE FrOM periods WhErE code IN ('r7', 'r6', 'r5', 'r4', 'r3', 'r2', 'r1', 'h30', 'h29', 'h28', 'h27', 'h26', 'h25', 'h24', 'h23', 'h22', 'h21')")
