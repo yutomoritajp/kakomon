@@ -97,6 +97,7 @@ quizzes {
     integer number "問題番号"
     text content "Markdown形式の問題文テキスト"
     integer correct_option "正解の選択肢（0=ア, 1=イ, 2=ウ, 3=エ）"
+    varchar status "draft=画像未配置, in_review=画像配置済み・レビュー待ち, published=公開中"
 }
 
 exams {
@@ -106,7 +107,7 @@ exams {
 }
 
 periods {
-    varchar code PK "試験回識別子（例：R7）"
+    varchar code PK "試験回識別子（例：r7）"
     varchar name "試験回表示名（例：令和7年秋）"
     integer sort_order "並び順"
 }

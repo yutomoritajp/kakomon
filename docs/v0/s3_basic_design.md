@@ -5,21 +5,23 @@
 ## スコープ完了定義
 
 データベーススペシャリスト試験(DB)の令和7年度(秋)の午前Ⅰの過去問の表示に必要なデータをDB及びストレージに入れる。
+※ 解説(`commentaries`テーブルの作成)は対象外。
 
 ## 設計
 
 ### 過去問データの作成方法について
 
-`quizzes`テーブルに格納する`number`, `content`, `correct_option`はbatch処理 + LLM APIで作成する。
+`quizzes`テーブルに格納する`number`, `content`, `correct_option`, `status`はbatch処理 + LLM APIで作成する。
 成果物として`exams`テーブルと`quizzes`テーブルにデータが格納されるシーディングファイルが作成される。
 
 #### 大まかな処理の流れと責務
 
 1. 元データとなるpdfファイルをストレージから取得する。（batch処理）
-2. pdfから必要な情報を切り出し、APIを呼ぶ。(batch処理)
-3. 問題文のテキストを受け取り、成形して返す。（LLM API）
-   ※LLMへの入力形式（テキストのみ / 画像同梱 / PDF同梱）は精度に依存するため実装時に検証して決定する。
-4. 画像をストレージに保存する。（batch処理）
+2. pdfから必要な情報（画像・文字列）を切り出し、APIを呼ぶ。(batch処理)
+3. 問題部のマークダウン文字列を成形して返す。画像パスはプレースホルダーとする（LLM API）
+4. 問題部の画像パスに実パスを埋め込む（batch処理）
+5. APIから取得した文字列やpdfから抽出した答えでシーディングファイルを作成する。（batch処理）
+6. 画像をストレージの適切な場所に配置する。（User処理）
 
 ```mermaid
 ---
@@ -34,18 +36,21 @@ participant Api
 User ->> Batch: period_code, section_code
 Batch ->> Storage: period_code, section_code
 Storage -->> Batch: question.pdf, answer.pdf
-loop 問題数分ループする
-Batch ->> Batch: 問題ごとにpdfを分割し問題部全体を画像に変換
-Batch ->> Batch: 文字列はテキスト化/表・図は画像変換
-Batch ->> Api: 全体画像/文字列/図・表の画像
+loop 問題数
+Batch ->> Batch: 画像・文字列に変換
+Batch ->> Batch: 答えを抽出
+Batch ->> Api: 全体画像/文字列
 Api ->> Api: 全体画像から整形されたマークダウンを作成
-Api -->> Batch: 問題部text
+Api -->> Batch: 問題部text(MD形式)
 end
 Batch ->> Batch: シーディングファイル作成
 Batch -->> User: 完了通知
-
+User ->> Storage: 図の画像を配置
 ```
-
+注意点
+- APIに画像と文字列を渡すのは、画像は問題文全体の構造を提示するため。文字列を渡すのは表記ゆれ等が起きにくくするため。すなわち構成は画像を正とし、文言は文字列を正とする。
+- APIが作成した問題部のデータに画像を入れる必要がない場合、`status`は`in_review`とする。画像を入れる必要がある問題の場合、`status`は`draft`となり、画像を入れたら`in_review`、レビューも完了していたら`published`となる。
+- 失敗した場合はシーディングファイルの作成に失敗するだけ（データの不整合などは起きない）ので、失敗した場合の処理は特に作らない。
 
 #### 元データの格納場所について
 
@@ -54,15 +59,13 @@ Batch -->> User: 完了通知
 ```
 .
 ├── backend/
-    ├── data/
-        ├── past_exams
-            ├── r7
-            |   ├── am1
-            |   |   ├── question.pdf
-            |   |   └── answer.pdf
-            |   ├── am2
-            |   
-            ├── r6
+    ├── past_exams/
+        ├── r7
+        |   ├── am1
+        |   |   ├── question.pdf
+        |   |   └── answer.pdf
+        |   ├── am2 
+        ├── r6
 ```
 
 #### 画像データ保存場所について
@@ -75,26 +78,25 @@ Batch -->> User: 完了通知
 ```
 .
 ├── backend/
-    ├── data/
-        ├── storage/
-            ├── r7/
-            |   ├── am1/
-            |   |   ├── questions/
-            |   |   |   ├── 3/
-            |   |   |       ├── 1.png
-            |   |   |       └── 2.png
-            |   |   ├── commentaries/
-            |   |       ├── 1/
-            |   |           └── 1.png
-            |   ├── am2/
-            ├── r6/
-            ├── r5/
+    ├── storage/
+        ├── r7/
+        |   ├── am1/
+        |   |   ├── questions/
+        |   |   |   ├── 3/
+        |   |   |       ├── 1.png
+        |   |   |       └── 2.png
+        |   |   ├── commentaries/
+        |   |       ├── 1/
+        |   |           └── 1.png
+        |   ├── am2/
+        ├── r6/
+        ├── r5/
 ```
 
 画像データはpngとする。（1問あたり画像ファイルは10枚未満になる想定。）
 画像ファイル名は、その問題・解説に出てくる順番で命名する。（1つ目の画像なら、`1.png`）
 
-※Markdown形式のデータ(`quizzes.content`など)に画像参照パスを埋め込むものことを想定。
+※Markdown形式のデータ(`quizzes.content`など)に画像参照パスを埋め込むことを想定。
 
 ## 対応手順（目安）
 
