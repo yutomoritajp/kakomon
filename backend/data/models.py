@@ -5,12 +5,14 @@ class Quiz(SQLModel, table=True):
     __tablename__ = "quizzes"
     __table_args__ = (
         CheckConstraint("correct_option between 0 and 3", name="check_correct_option"),
+        CheckConstraint("status in ('draft', 'in_review', 'published')", name="check_status"),
     )
     id: int | None = Field(default=None, primary_key=True)
     exam_id: int = Field(foreign_key="exams.id")
     number: int = Field(sa_column_kwargs={"comment": "問題番号"})
     content: str = Field(sa_column_kwargs={"comment": "Markdown形式の問題文テキスト"})
     correct_option: int = Field(sa_column_kwargs={"comment": "正解の選択肢（0=ア, 1=イ, 2=ウ, 3=エ）"})
+    status: str = Field(sa_column_kwargs={"comment": "draft=画像未配置, in_review=画像配置済み・レビュー待ち, published=公開中"})
 
 class Exam(SQLModel, table=True):
     __tablename__ = "exams"
