@@ -9,4 +9,7 @@ dependencies = [
     "sqlModel>=0.0.38",
     "psycopg[binary]>=3.3",
     "alembic>=1.13",
+    "anthropic>=0.120.2",
+    "dotenv>=0.9.9",
+    "pymupdf>=1.28.0",
 ]
