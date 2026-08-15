@@ -1,8 +1,8 @@
 import pymupdf
+import os
 from services.constants.pdf_type import PdfType
 from services.constants.period import Period
 from services.constants.section import Section
-import os
 
 class PdfService():   
     _TEMP_DIR = "temp/"
@@ -17,13 +17,16 @@ class PdfService():
         self._pdf_type = pdf_type
         self._document = pymupdf.open(self._create_pdf_path())
             
-    def confirm_pdf(self, start:int, end:int) -> str:
+    def create_pdf(self, start:int, end:int) -> str:
         """
         指定された範囲のPdfを一時保存フォルダに作成する。
         
         Args:
             start: 最初のページ
             end: 最後のページ
+        
+        Returns:
+            filename: 作成したpdfのファイル名
         """
         
         ## 対象pdfを取得
