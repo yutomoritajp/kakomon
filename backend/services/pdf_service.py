@@ -1,5 +1,7 @@
 import pymupdf
 import os
+import base64
+from services.values.page_range import PageRange
 from services.constants.pdf_type import PdfType
 from services.constants.period import Period
 from services.constants.section import Section
@@ -15,51 +17,52 @@ class PdfService():
         self._period = period
         self._section = section
         self._pdf_type = pdf_type
-        self._document = pymupdf.open(self._create_pdf_path())
+        self._document = pymupdf.open(self._create_path())
             
-    def create_pdf(self, start:int, end:int) -> str:
+    def create_file_to_temp(self, page_range: PageRange) -> str:
         """
         指定された範囲のPdfを一時保存フォルダに作成する。
-        
-        Args:
-            start: 最初のページ
-            end: 最後のページ
         
         Returns:
             filename: 作成したpdfのファイル名
         """
         
         ## 対象pdfを取得
-        pdf = self._get_target_pdf(start, end)
+        pdf = self._get_target_doc(page_range)
                 
         ## 一時保存ディレクトリがない場合は作成する。
         os.makedirs(self._TEMP_DIR, exist_ok=True)
         
-        filename = f"p{start}-p{end}_{self._period.value}_{self._section.value}_{self._pdf_type.value}"
+        filename = f"p{page_range.start}-p{page_range.end}_{self._period.value}_{self._section.value}_{self._pdf_type.value}"
         pdf.save(self._TEMP_DIR + filename)
         
         return filename
+    
+    def get_base64_data(self, page_range: PageRange) -> str:
+        """
+        指定された範囲のPdfデータを取得します。 
+        
+        Returns:
+            base64エンコードされたPDFデータ（文字列）
+        """
+        pdf_bytes = self._get_target_doc(page_range).tobytes()
+        
+        return base64.standard_b64encode(pdf_bytes).decode("utf-8")
         
     
-    def _get_target_pdf(self, start: int, end: int) -> pymupdf.Document:
+    def _get_target_doc(self, page_range: PageRange) -> pymupdf.Document:
         """
         指定された範囲のPdfを取得する。ページ番号は1始まり。
-            
-        Args:
-            start: 最初のページ
-            end: 最後のページ
         """
             
-        if start > end:
-            raise ValueError(f"開始ページは終了ページより小さい値を指定してください。start={start}, end={end}")
-            
-        if start < 1 or end > self._document.page_count:
-            raise ValueError(f"開始ページまたは終了ページの値が不正です。start={start}, end={end}")
+        if page_range.end > self._document.page_count:
+            raise ValueError(f"終了ページの値がページ数を超えています。end={page_range.end}, page_count={self._document.page_count}")
             
         new_pdf = pymupdf.open()
-        new_pdf.insert_pdf(self._document, from_page=start - 1, to_page=end - 1)
+        new_pdf.insert_pdf(self._document,
+                           from_page=page_range.start - 1, to_page=page_range.end - 1)
             
         return new_pdf
         
-    def _create_pdf_path(self) -> str:
+    def _create_path(self) -> str:
         return f"past_exams/{self._period.value}/{self._section.value}/{self._pdf_type.value}"

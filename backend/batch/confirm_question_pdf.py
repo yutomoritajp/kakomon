@@ -1,4 +1,5 @@
 import argparse
+from services.values.page_range import PageRange
 from services.pdf_service import PdfService
 from services.constants.pdf_type import PdfType
 from services.constants.period import Period
@@ -19,7 +20,7 @@ def main() -> None:
     args = parser.parse_args()
     
     pdf_service = PdfService(Period(args.period), Section(args.section), PdfType.QUESTION)
-    filename = pdf_service.create_pdf(args.start, args.end)
+    filename = pdf_service.create_file_to_temp(PageRange(args.start, args.end))
     
     print(f"PDFを作成しました。{filename}")
 
