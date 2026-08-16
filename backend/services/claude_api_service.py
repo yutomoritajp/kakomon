@@ -1,5 +1,6 @@
 from anthropic import Anthropic, types
 from dotenv import load_dotenv
+from services.exceptions.claude_api_response_exception import ClauadeApiResponseException
 
 class ClaudeApiService:
     _client: Anthropic
@@ -21,9 +22,14 @@ class ClaudeApiService:
         output_formatなどの簡易パラメータを使う場合に使用する。
         create_messageが使用可能な場合はそちらを使用する。
         """
-        return self._client.messages.parse(
+        response =  self._client.messages.parse(
             model = self._default_model,
             max_tokens = self._default_max_tokens,
             messages = messages,
             **keyargs
         )
+
+        if response.stop_reason != "end_turn":
+            raise ClauadeApiResponseException(stop_reason=response.stop_reason, usage=response.usage)
+
+        return response
