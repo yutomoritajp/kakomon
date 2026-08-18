@@ -40,16 +40,30 @@ class PdfService():
     
     def get_base64_data(self, page_range: PageRange) -> str:
         """
-        指定された範囲のPdfデータを取得します。 
+        指定された範囲のPDFのバイナリデータを取得する。
         
         Returns:
             base64エンコードされたPDFデータ（文字列）
         """
-        pdf_bytes = self._get_target_doc(page_range).tobytes()
+        target_doc = self._get_target_doc(page_range)
+        pdf_bytes = target_doc.tobytes()
+        target_doc.close()
         
         return base64.standard_b64encode(pdf_bytes).decode("utf-8")
-        
     
+    def get_first_page_text(self, **kwargs) -> str:
+        """
+        最初のページのプレーンテキストを取得する。
+        
+        Args:
+          kwargs: get_textに渡す引数（任意）
+        """
+        target_doc = self._get_target_doc(PageRange(1, 1))
+        result = target_doc[0].get_text(**kwargs)
+        target_doc.close()
+        
+        return str(result)
+        
     def _get_target_doc(self, page_range: PageRange) -> pymupdf.Document:
         """
         指定された範囲のPdfを取得する。ページ番号は1始まり。
