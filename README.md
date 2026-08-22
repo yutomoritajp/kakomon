@@ -39,11 +39,10 @@ docker compose run --rm frontend npm install <package>
 .
 ├── compose.yaml      ← Docker Compose定義
 ├── docs/             ← 要件定義書・基本設計書（バージョンごとにフォルダを分ける）
+├── backend/          ← バックエンド（Python）
 ├── frontend/         ← フロントエンド（React）
 └── .claude/          ← AIエージェント向けの指示・規約
 ```
-
-`api/`（FastAPI）、`batch/`、`db/`（PostgreSQL）は今後追加予定。
 
 ## Todoリスト
 

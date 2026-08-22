@@ -11,17 +11,17 @@
 
 ### 過去問データの作成方法について
 
-`quizzes`テーブルに格納する`number`, `content`, `correct_option`, `status`はbatch処理 + LLM APIで作成する。
+`quizzes`テーブルに格納する`number`, `content`, `correct_option`, `status`はスクリプト + LLM APIで作成する。
 成果物として`exams`テーブルと`quizzes`テーブルにデータが格納されるシーディングファイルが作成される。
 
 #### 大まかな処理の流れと責務
 
-1. Userが作成する問題の試験回/試験区分を選択。さらに、`question.pdf`の中から問題が書いてあるページの範囲を確認してBatchの引数に渡す。
-2. 元データとなるpdfファイルをストレージから取得する。（batch処理）
-3. `question.pdf`を`手順1`で渡した範囲でページごとに分割し、APIを呼ぶ。(batch処理)
+1. Userが作成する問題の試験回/試験区分を選択。さらに、`question.pdf`の中から問題が書いてあるページの範囲を確認してスクリプトの引数に渡す。
+2. 元データとなるpdfファイルをストレージから取得する。（スクリプト）
+3. `question.pdf`を`手順1`で渡した範囲でページごとに分割し、APIを呼ぶ。(スクリプト)
 4. 問題部のマークダウン文字列を成形して返す。画像パスはプレースホルダーとする（LLM API）
-5. 問題部の画像パスに実パスを埋め込む（batch処理）
-6. APIから取得した文字列やpdfから抽出した答えでシーディングファイルを作成する。（batch処理）
+5. 問題部の画像パスに実パスを埋め込む（スクリプト）
+6. APIから取得した文字列やpdfから抽出した答えでシーディングファイルを作成する。（スクリプト）
 7. 画像をストレージの適切な場所に配置する。（User処理）
 
 ```mermaid
@@ -30,26 +30,26 @@ title: 処理イメージ(Todo:実装が確定したらこの図を実装に合�
 ---
 sequenceDiagram
 participant User
-participant Batch
+participant Script
 participant Storage
 participant Api
 
-User ->> Batch: period_code, section_code, ページ範囲
-Batch ->> Storage: period_code, section_code
-Storage -->> Batch: question.pdf, answer.pdf
+User ->> Script: period_code, section_code, ページ範囲
+Script ->> Storage: period_code, section_code
+Storage -->> Script: question.pdf, answer.pdf
 loop ページ数
-Batch ->> Api: 問題作成リクエスト
+Script ->> Api: 問題作成リクエスト
 Api ->> Api: 問題部を作成
-Api -->> Batch: 問題部text(MD形式), 問題番号など
+Api -->> Script: 問題部text(MD形式), 問題番号など
 end
-Batch ->> Batch: answer.pdfから正解の番号を取得する。
-Batch ->> Batch: シーディングファイル作成(実リンク埋め込みも含む)
-Batch -->> User: 完了通知
+Script ->> Script: answer.pdfから正解の番号を取得する。
+Script ->> Script: シーディングファイル作成(実リンク埋め込みも含む)
+Script -->> User: 完了通知
 User ->> Storage: 図の画像を配置
 ```
 注意点
 - 問題文のPDFは各ページが一枚の画像になっている。そのためOCR処理をすることが避けられない。したがって、APIの料金やパフォーマンスに問題が起きない最低限の状態に処理までし、問題文の作成はAPIに任せる。
-- 解答例のPDFは画像ではなく文字データが入っている。そのため、解答の選択肢の抽出はAPIではなくBatch側で処理する。
+- 解答例のPDFは画像ではなく文字データが入っている。そのため、解答の選択肢の抽出はAPIではなくスクリプトで処理する。
 - OCRの誤り検知および画像データの確保は開発者が行う。確認した問題は`status`を`draft`及び`in_review`から`published`に変更する。(`draft`は画像を入れた後`in_review`を経由して`published`になる)
 - APIが作成した問題部のデータに画像を入れる必要がない場合、`status`は`in_review`とする。画像を入れる必要がある問題の場合、`status`は`draft`とする。
 - 失敗した場合はシーディングファイルの作成に失敗するだけ（データの不整合などは起きない）ので、失敗した場合の処理は特に作らない。
