@@ -7,10 +7,22 @@ paths: ['backend/**/*']
 このバックエンドは**すべてDockerコンテナ上で動作する**。ホストに直接 Python / uv をインストールして動かす運用はしない。
 
 ## 技術スタック
+パッケージの正は `backend/pyproject.toml`。ここには各パッケージの役割を記す。
+
+### 実行時依存（`[project]` の `dependencies`）
 - Python 3.13
-- FastAPI（`fastapi[standard]`）
+- FastAPI（`fastapi[standard]`）… Web API
 - SQLModel（ORM）
 - psycopg（PostgreSQL ドライバ、`psycopg[binary]`）
+- Alembic（`alembic`）… DB マイグレーション。定義は `backend/data/migrations/` 配下
+- Anthropic SDK（`anthropic`）… Claude API クライアント。`backend/services/claude_api_service.py` で使用
+- PyMuPDF（`pymupdf`）… 過去問 PDF の解析。`backend/services/pdf_service.py` で使用
+- dotenv（`dotenv`）… `.env` の読み込み
+
+### 開発用依存（`[dependency-groups]` の `dev`）
+- pytest（`pytest`）… テスト
+
+### ツール
 - uv（パッケージ・依存管理）
 
 ## コンテナ構成（`backend/Dockerfile`）
