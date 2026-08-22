@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 from services.pdf_service import PdfService
 from services.claude_api_service import ClaudeApiService
-from services.values.page_range import PageRange
-from services.constants.pdf_type import PdfType
-from services.constants.period import Period
-from services.constants.section import Section
+from values.page_range import PageRange
+from constants.pdf_type import PdfType
+from constants.period import Period
+from constants.section import Section
 import re
 
 

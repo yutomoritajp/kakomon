@@ -1,7 +1,7 @@
 # scripts実行手順
 
 `scripts/`配下には、管理者がコンテナに入って手動実行するCLIスクリプトを配置する。
-各スクリプトは薄いエントリポイントとし、実処理は`services/`配下のクラスに委譲する。
+各スクリプトは薄いエントリポイントとし、引数パースとログ設定のみを行う。実処理は`usecases/`（業務手順）または`services/`（外部リソースのラッパー）に委譲する。
 
 ## 共通の実行方法
 
@@ -30,8 +30,8 @@ docker compose exec backend python -m scripts.confirm_question_pdf --period {試
 
 | オプション | 必須 | 内容 |
 | --- | --- | --- |
-| `--period` | ○ | 試験回（例: `r7`）。指定可能な値は`services/constants/period.py`を参照 |
-| `--section` | ○ | 試験区分（例: `am1`）。指定可能な値は`services/constants/section.py`を参照 |
+| `--period` | ○ | 試験回（例: `r7`）。指定可能な値は`constants/period.py`を参照 |
+| `--section` | ○ | 試験区分（例: `am1`）。指定可能な値は`constants/section.py`を参照 |
 | `--start` | ○ | 抽出開始ページ（1始まり） |
 | `--end` | ○ | 抽出終了ページ |
 

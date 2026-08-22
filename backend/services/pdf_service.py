@@ -1,10 +1,10 @@
 import pymupdf
 import os
 import base64
-from services.values.page_range import PageRange
-from services.constants.pdf_type import PdfType
-from services.constants.period import Period
-from services.constants.section import Section
+from values.page_range import PageRange
+from constants.pdf_type import PdfType
+from constants.period import Period
+from constants.section import Section
 
 class PdfService():   
     _TEMP_DIR = "temp/"

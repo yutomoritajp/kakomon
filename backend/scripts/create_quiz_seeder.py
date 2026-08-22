@@ -1,13 +1,13 @@
 import argparse
-from services.values.page_range import PageRange
-from services.constants.period import Period
-from services.constants.section import Section
-from services.quiz_seeder_service import create_quiz_seeder, _get_collect_options
+from values.page_range import PageRange
+from constants.period import Period
+from constants.section import Section
+from usecases.quiz_seeder import create_quiz_seeder
 from scripts.setup_logging import setup_logging
 
 def main() -> None:
     setup_logging()
-    message = _get_collect_options(Period.R7, Section.AM1)
+    message = create_quiz_seeder(Period.R7, Section.AM1, PageRange(1, 3))
     print("レスポンス↓")
     print(message)
     

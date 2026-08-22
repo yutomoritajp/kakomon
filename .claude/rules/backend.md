@@ -34,6 +34,13 @@ paths: ['backend/**/*']
 ## 依存パッケージの追加・更新・削除
 backend の依存を変更する際は必ず `backend/README.md` の手順を参照すること。
 
+## レイヤ規約
+- `services/` … 外部リソース（PDF、Claude API 等）のラッパー。接続や読み込みの状態を持つクラスとして実装し、`*Service` と命名する。
+- `usecases/` … service を組み合わせた業務手順。呼び出し元（scripts / API）を知らない。`*_service` などの接尾辞は付けない（例：`usecases/quiz_seeder.py`）。
+- `scripts/` … 手動実行の CLI エントリポイント。引数パースとログ設定のみを行い、実処理は usecases / services に委譲する。定期実行ジョブが必要になった時点で `batch/` を別に設けて区別する。
+- `constants/` `values/` … どの層にも属さない共有の型。`backend/` 直下に置き、全層から参照してよい。
+- 依存の向きは `scripts/` → `usecases/` → `services/`。逆方向の import はしない。
+
 ## マスターデータの採番規約
 - `periods.sort_order` は**新しい試験回ほど小さい値**とし、昇順で並べると新しい試験回が先頭に来る。基点は `r7 = 100`。今後追加する試験回（r8 以降）は 99・98… と降順で採番する（負数は避け、0 まで 100 枠を確保）。
 
