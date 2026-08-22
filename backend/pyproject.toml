@@ -10,8 +10,8 @@ dependencies = [
     "psycopg[binary]>=3.3",
     "alembic>=1.13",
     "anthropic>=0.120.2",
-    "dotenv>=0.9.9",
     "pymupdf>=1.28.0",
+    "python-dotenv>=1.2.2",
 ]
 
 [dependency-groups]

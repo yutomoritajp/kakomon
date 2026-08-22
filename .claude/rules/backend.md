@@ -17,7 +17,7 @@ paths: ['backend/**/*']
 - Alembic（`alembic`）… DB マイグレーション。定義は `backend/data/migrations/` 配下
 - Anthropic SDK（`anthropic`）… Claude API クライアント。`backend/services/claude_api_service.py` で使用
 - PyMuPDF（`pymupdf`）… 過去問 PDF の解析。`backend/services/pdf_service.py` で使用
-- dotenv（`dotenv`）… `.env` の読み込み
+- python-dotenv（`python-dotenv`）… `.env` の読み込み。import 名は `dotenv`
 
 ### 開発用依存（`[dependency-groups]` の `dev`）
 - pytest（`pytest`）… テスト
@@ -31,7 +31,7 @@ paths: ['backend/**/*']
 - ビルド時に `RUN uv sync --frozen` で依存をインストールする
 - backend のソースはバインドマウントしている（更新したファイルはホスト側に書き戻る）
 
-## 依存パッケージの追加・更新
+## 依存パッケージの追加・更新・削除
 backend の依存を変更する際は必ず `backend/README.md` の手順を参照すること。
 
 ## マスターデータの採番規約
