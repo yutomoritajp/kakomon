@@ -57,3 +57,4 @@ backend の依存を変更する際は必ず `backend/README.md` の手順を参
 - 全モジュール・全メソッドへのテスト作成は必須としない。必要・不要は開発者と相談の上で決める。
 - `--import-mode=importlib` で実行するため、テストファイル同士を import できない。共通処理は `conftest.py` のフィクスチャにする。
 - pytest の設定と実行方法は `backend/tests/README.md` を参照すること。
+- `@pytest.mark.parametrize` の `ids` は `"When <条件>, it should <期待される結果>."` の形式で英語表記する（例：`"When start == 0, it should raise ValueError."`）。
