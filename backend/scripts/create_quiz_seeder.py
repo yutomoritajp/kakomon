@@ -2,7 +2,7 @@ import argparse
 from values.page_range import PageRange
 from constants.period import Period
 from constants.section import Section
-from usecases.quiz_seeder import create_quiz_seeder
+from usecases.create_quiz import 
 from scripts.setup_logging import setup_logging
 
 def main() -> None:
