@@ -62,8 +62,8 @@ def upgrade() -> None:
                 "sort_order": 105
             },
             {
-                "name": "令和元年度",
-                "code": "r1",
+                "name": "平成31年度",
+                "code": "h31",
                 "sort_order": 106
             },
             {
