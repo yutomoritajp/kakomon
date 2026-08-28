@@ -55,7 +55,8 @@ def upgrade() -> None:
     sa.Column('correct_option', sa.Integer(), nullable=False, comment='正解の選択肢（0=ア, 1=イ, 2=ウ, 3=エ）'),
     sa.CheckConstraint('correct_option between 0 and 3', name='check_correct_option'),
     sa.ForeignKeyConstraint(['exam_id'], ['exams.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('exam_id', 'number', name='uix_exam_number')
     )
     op.create_table('commentaries',
     sa.Column('id', sa.Integer(), nullable=False),

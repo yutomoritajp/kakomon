@@ -6,6 +6,7 @@ class Quiz(SQLModel, table=True):
     __table_args__ = (
         CheckConstraint("correct_option between 0 and 3", name="check_correct_option"),
         CheckConstraint("status in ('draft', 'in_review', 'published')", name="check_status"),
+        UniqueConstraint("exam_id", "number", name="uix_exam_number"),
     )
     id: int | None = Field(default=None, primary_key=True)
     exam_id: int = Field(foreign_key="exams.id")
