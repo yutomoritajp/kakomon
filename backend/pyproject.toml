@@ -27,7 +27,7 @@ addopts = "--import-mode=importlib"
 [tool.pyright]
 typeCheckingMode = "standard"
 pythonVersion = "3.13"
-exclude = ["**/__pycache__", "**/node_modules", "**/.*", "temp", "past_exams", "data"]
+exclude = ["**/__pycache__", "**/node_modules", "**/.*", "temp", "past_exams", "data/migrations"]
 
 [tool.ruff]
 target-version = "py313"
