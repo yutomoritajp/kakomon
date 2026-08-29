@@ -27,123 +27,134 @@ class ParsedQuizList(BaseModel):
     quizzes: list[ParsedQuiz]
 
 
-_SYSTEM_PROMPT = """
-PDFから問題を読み取り、マークダウン形式に変換する。
-numberにはその問題番号を入れる。
-contentにはマークダウンに変換した文字列が入る。
-簡単な表はそのままマークダウン形式として作成する。
-複雑な表や、グラフや、図は'<<image>>'と置き換える。
-image_flagは、content内に'<<image>>'と置き換えた個所がある場合のみTrueにする。
-"""
+_SYSTEM_PROMPT = ""
 
 
-def create_quiz_data(period: Period, section: Section, page_range: PageRange) -> None:
-    """
-    公式過去問題のPDFをもとに、Quizテーブルのシーディングファイルを作成します。
-    """
-    ## マークダウン化した問題テキストを取得
-    parsed_quiz_list = _get_parsed_quizzes(period, section, page_range)
+class CreateQuiz:
+    _period: Period
+    _section: Section
+    _quiz_count: int
 
-    ## 正解の選択肢を取得
-    correct_option_dict = _get_correct_options(period, section)
+    def __init__(self, period: Period, section: Section):
+        if section.quiz_count is None:
+            raise ValueError(f"予期しないSectionです。Section: {section.value}")
 
-    ## 試験Id(exam_id)を取得して、同Sessionでクイズをクイズを作成
-    with Session(engine) as session:
-        exam_id = ExamRepository(session).get_exam_id(period, section)
+        self._quiz_count = section.quiz_count
+        self._period = period
+        self._section = section
 
-        QuizRepository(session).add_all(
-            [
-                Quiz(
-                    exam_id=exam_id,
-                    number=quiz.number,
-                    content=quiz.content,
-                    correct_option=QuizOption(correct_option_dict[quiz.number]).code,
-                    status=QuizStatus.DRAFT.value
-                    if quiz.has_image
-                    else QuizStatus.IN_REVIEW.value,
-                )
-                for quiz in parsed_quiz_list.quizzes
-            ]
-        )
+    def execute(self, page_range: PageRange) -> None:
+        """
+        公式過去問題のPDFから問題を抽出し、Quizデータを作成する。
+        """
 
-        session.commit()
+        ## マークダウン化した問題テキストを取得
+        parsed_quiz_list = self._get_parsed_quizzes(page_range)
 
+        ## 正解の選択肢を取得
+        correct_option_dict = self._get_correct_options()
 
-def _get_parsed_quizzes(
-    period: Period, section: Section, page_range: PageRange
-) -> ParsedQuizList:
-    ## ClaudeAPIでPDFから問題文を生成する。
-    pdf_service = PdfService(period, section, PdfType.QUESTION)
-    pdf_data = pdf_service.get_base64_data(page_range)
+        ## 試験Id(exam_id)を取得して、同Sessionでクイズを作成
+        with Session(engine) as session:
+            exam_id = ExamRepository(session).get_exam_id(self._period, self._section)
 
-    ## 有効なPDF情報が取得できていない場合は、例外を投げる。
-    if not pdf_data:
-        raise ValueError(f"有効なPDFの値が取得できませんでした。{pdf_data}")
+            QuizRepository(session).add_all(
+                [
+                    Quiz(
+                        exam_id=exam_id,
+                        number=quiz.number,
+                        content=quiz.content,
+                        correct_option=QuizOption(
+                            correct_option_dict[quiz.number]
+                        ).code,
+                        status=QuizStatus.DRAFT.value
+                        if quiz.has_image
+                        else QuizStatus.IN_REVIEW.value,
+                    )
+                    for quiz in parsed_quiz_list.quizzes
+                ]
+            )
 
-    claude_api_service = ClaudeApiService()
-    response = claude_api_service.create_parse_message(
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "document",
-                        "source": {
-                            "type": "base64",
-                            "media_type": "application/pdf",
-                            "data": pdf_data,
+            session.commit()
+
+    def _get_parsed_quizzes(self, page_range: PageRange) -> ParsedQuizList:
+        ## ClaudeAPIでPDFから問題文を生成する。
+        pdf_service = PdfService(self._period, self._section, PdfType.QUESTION)
+        pdf_data = pdf_service.get_base64_data(page_range)
+
+        ## 有効なPDF情報が取得できていない場合は、例外を投げる。
+        if not pdf_data:
+            raise ValueError(f"有効なPDFの値が取得できませんでした。{pdf_data}")
+
+        claude_api_service = ClaudeApiService()
+        response = claude_api_service.create_parse_message(
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "document",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "application/pdf",
+                                "data": pdf_data,
+                            },
                         },
-                    },
-                    {"type": "text", "text": "問題ごとに作成してください。"},
-                ],
-            }
-        ],
-        output_format=ParsedQuizList,
-        system=_SYSTEM_PROMPT,
-    )
-
-    if not response.parsed_output:
-        raise ValueError(
-            f"ClaudeAPIから値が取得できませんでした。{response.stop_reason}"
+                        {"type": "text", "text": "問題ごとに作成してください。"},
+                    ],
+                }
+            ],
+            output_format=ParsedQuizList,
+            system=_SYSTEM_PROMPT,
         )
 
-    return response.parsed_output
+        if not response.parsed_output:
+            raise ValueError(
+                f"ClaudeAPIから値が取得できませんでした。{response.stop_reason}"
+            )
 
+        quiz_numbers = sorted([quiz.number for quiz in response.parsed_output.quizzes])
 
-def _get_correct_options(period: Period, section: Section) -> dict[int, str]:
-    """
-    選択形式の問題（午前Ⅰ/午前Ⅱ）の正解の選択肢を取得する。
+        if quiz_numbers != list(range(1, self._quiz_count + 1)):
+            raise ValueError(
+                "取得した問題の問題番号が不正です。"
+                f"取得した問題番号のリスト: {quiz_numbers}"
+            )
 
-    Returns:
-        問題番号と正解の選択肢のオブジェクト。
-        { 1: "ア"} は1問目の正解がアであることを表す。
-    """
+        return response.parsed_output
 
-    ## 選択式の問題を想定しているため、quiz_countが存在しないSectionの場合は例外を出す。
-    if section.quiz_count is None:
-        raise ValueError(f"予期しないSectionです。Section: {section.value}")
+    def _get_correct_options(self) -> dict[int, str]:
+        """
+        選択形式の問題（午前Ⅰ/午前Ⅱ）の正解の選択肢を取得する。
 
-    result = {number: "" for number in range(1, section.quiz_count + 1)}
+        Returns:
+            問題番号と正解の選択肢のオブジェクト。
+            { 1: "ア"} は1問目の正解がアであることを表す。
+        """
 
-    pdf_service = PdfService(period, section, PdfType.ANSWER)
+        result = {number: "" for number in range(1, self._quiz_count + 1)}
 
-    option_list = [
-        (int(number), option)
-        for number, option in re.findall(
-            r"問\s*(\d+)\s+([アイウエ])", pdf_service.get_first_page_text()
-        )
-    ]
+        pdf_service = PdfService(self._period, self._section, PdfType.ANSWER)
 
-    for number, option in option_list:
-        if number not in result:
-            raise ValueError(f"予期しない問題番号が取得されました。number: {number}")
-        if result[number] != "":
-            raise ValueError(f"問題番号が2重に登録されました。number: {number}")
-        result[number] = option
+        option_list = [
+            (int(number), option)
+            for number, option in re.findall(
+                r"問\s*(\d+)\s+([アイウエ])", pdf_service.get_first_page_text()
+            )
+        ]
 
-    ## 空文字が含まれている場合はErrorを出す。
-    for key, value in result.items():
-        if value == "":
-            raise ValueError(f"{key}問目の問題が登録されていません。")
+        for number, option in option_list:
+            if number not in result:
+                raise ValueError(
+                    f"予期しない問題番号が取得されました。number: {number}"
+                )
+            if result[number] != "":
+                raise ValueError(f"問題番号が2重に登録されました。number: {number}")
+            result[number] = option
 
-    return result
+        ## 空文字が含まれている場合はErrorを出す。
+        for key, value in result.items():
+            if value == "":
+                raise ValueError(f"{key}問目の問題が登録されていません。")
+
+        return result
