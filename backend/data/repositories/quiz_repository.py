@@ -2,8 +2,6 @@ from sqlmodel import Session
 
 from data.models import Quiz
 
-# from dtos.quiz_input import QuizInput →いったん使わなくなったので、、、消す予定だけど、もしレビューで指摘された時のため残しておく。
-
 
 class QuizRepository:
     _session: Session
