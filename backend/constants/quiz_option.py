@@ -5,6 +5,7 @@ class QuizOption(Enum):
     """
     Quizの選択肢
     """
+
     ### 数値
     number: int
 
@@ -15,13 +16,13 @@ class QuizOption(Enum):
         return obj
 
     ## ア
-    A = ("ア", 0)
+    FIRST = ("ア", 0)
 
     ## イ
-    B = ("イ", 1)
-    
+    SECOND = ("イ", 1)
+
     ## ウ
-    C = ("ウ", 2)
-    
+    THIRD = ("ウ", 2)
+
     ## エ
-    D = ("エ", 3)
+    FOURTH = ("エ", 3)

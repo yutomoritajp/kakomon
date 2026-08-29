@@ -1,10 +1,11 @@
 from enum import Enum
 
+
 class Period(Enum):
     """
     試験回
     """
-    
+
     ## 令和
     R7 = "r7"
     R6 = "r6"
@@ -12,7 +13,7 @@ class Period(Enum):
     R4 = "r4"
     R3 = "r3"
     R2 = "r2"
-    
+
     ## 平成
     H31 = "h31"
     H30 = "h30"
@@ -25,4 +26,3 @@ class Period(Enum):
     H23 = "h23"
     H22 = "h22"
     H21 = "h21"
-    

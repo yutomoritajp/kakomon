@@ -31,6 +31,7 @@ exclude = ["**/__pycache__", "**/node_modules", "**/.*", "temp", "past_exams", "
 
 [tool.ruff]
 target-version = "py313"
+extend-exclude = ["data/migrations"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
