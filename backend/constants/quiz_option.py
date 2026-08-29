@@ -6,13 +6,13 @@ class QuizOption(Enum):
     Quizの選択肢
     """
 
-    ### 数値
-    number: int
+    ## コード
+    code: int
 
-    def __new__(cls, value, number):
+    def __new__(cls, value, code):
         obj = object.__new__(cls)
         obj._value_ = value
-        obj.number = number
+        obj.code = code
         return obj
 
     ## ア

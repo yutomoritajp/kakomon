@@ -57,7 +57,7 @@ def create_quiz_data(period: Period, section: Section, page_range: PageRange) ->
                     exam_id=exam_id,
                     number=quiz.number,
                     content=quiz.content,
-                    correct_option=QuizOption(correct_option_dict[quiz.number]).number,
+                    correct_option=QuizOption(correct_option_dict[quiz.number]).code,
                     status=QuizStatus.DRAFT.value
                     if quiz.has_image
                     else QuizStatus.IN_REVIEW.value,

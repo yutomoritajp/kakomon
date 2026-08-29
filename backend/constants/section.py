@@ -9,9 +9,9 @@ class Section(Enum):
     ### 問題数
     quiz_count: int | None
 
-    def __new__(cls, code, quiz_count):
+    def __new__(cls, value, quiz_count):
         obj = object.__new__(cls)
-        obj._value_ = code
+        obj._value_ = value
         obj.quiz_count = quiz_count
         return obj
 
