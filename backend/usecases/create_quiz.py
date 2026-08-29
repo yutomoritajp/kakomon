@@ -1,11 +1,17 @@
 import re
 
 from pydantic import BaseModel
+from sqlmodel import Session
 
 from constants.pdf_type import PdfType
 from constants.period import Period
+from constants.quiz_option import QuizOption
+from constants.quiz_status import QuizStatus
 from constants.section import Section
-from dtos.quiz_seed import QuizSeed
+from data.database import engine
+from data.models import Quiz
+from data.repositories.exam_repository import ExamRepository
+from data.repositories.quiz_repository import QuizRepository
 from services.claude_api_service import ClaudeApiService
 from services.pdf_service import PdfService
 from values.page_range import PageRange
@@ -31,12 +37,41 @@ image_flagは、content内に'<<image>>'と置き換えた個所がある場合�
 """
 
 
-def create_quiz_data(
-    period: Period, section: Section, page_range: PageRange
-) -> list[QuizSeed]:
+def create_quiz_data(period: Period, section: Section, page_range: PageRange) -> None:
     """
     公式過去問題のPDFをもとに、Quizテーブルのシーディングファイルを作成します。
     """
+    ## マークダウン化した問題テキストを取得
+    parsed_quiz_list = _get_parsed_quizzes(period, section, page_range)
+
+    ## 正解の選択肢を取得
+    correct_option_dict = _get_correct_options(period, section)
+
+    ## 試験Id(exam_id)を取得して、同Sessionでクイズをクイズを作成
+    with Session(engine) as session:
+        exam_id = ExamRepository(session).get_exam_id(period, section)
+
+        QuizRepository(session).add_all(
+            [
+                Quiz(
+                    exam_id=exam_id,
+                    number=quiz.number,
+                    content=quiz.content,
+                    correct_option=QuizOption(correct_option_dict[quiz.number]).number,
+                    status=QuizStatus.DRAFT.value
+                    if quiz.has_image
+                    else QuizStatus.IN_REVIEW.value,
+                )
+                for quiz in parsed_quiz_list.quizzes
+            ]
+        )
+
+        session.commit()
+
+
+def _get_parsed_quizzes(
+    period: Period, section: Section, page_range: PageRange
+) -> ParsedQuizList:
     ## ClaudeAPIでPDFから問題文を生成する。
     pdf_service = PdfService(period, section, PdfType.QUESTION)
     pdf_data = pdf_service.get_base64_data(page_range)
@@ -72,11 +107,7 @@ def create_quiz_data(
             f"ClaudeAPIから値が取得できませんでした。{response.stop_reason}"
         )
 
-    ## 正解の選択肢を取得する。
-    option_dict = _get_correct_options(period, section)
-
-    ## 問題部分と解答を組み立てて返す。
-    return _build_quiz_seeds(response.parsed_output.quizzes, option_dict)
+    return response.parsed_output
 
 
 def _get_correct_options(period: Period, section: Section) -> dict[int, str]:
@@ -116,12 +147,3 @@ def _get_correct_options(period: Period, section: Section) -> dict[int, str]:
             raise ValueError(f"{key}問目の問題が登録されていません。")
 
     return result
-
-
-def _build_quiz_seeds(
-    parsed_list: list[ParsedQuiz], option_dict: dict[int, str]
-) -> list[QuizSeed]:
-    return [
-        QuizSeed(**quiz.model_dump(), correct_option=option_dict[quiz.number])
-        for quiz in parsed_list
-    ]
