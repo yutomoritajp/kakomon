@@ -2,7 +2,7 @@ import pytest
 
 from constants.period import Period
 from constants.section import Section
-from usecases.create_quiz import _get_correct_options
+from usecases.create_quiz import CreateQuiz
 
 
 @pytest.mark.parametrize(
@@ -50,7 +50,7 @@ def test_get_correct_options(
     正解結果はランダムな問題番号をスポットチェックする。
     新しいPeriod, Sectionに対応したらこのUTにパターンを追加する。
     """
-    correct_options = _get_correct_options(period, section)
+    correct_options = CreateQuiz(period, section)._get_correct_options()
 
     ## 問題数が正しいこと。
     assert len(correct_options) == section.quiz_count
