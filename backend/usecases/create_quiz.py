@@ -31,6 +31,11 @@ _SYSTEM_PROMPT = ""
 
 
 class CreateQuiz:
+    """
+    形式が異なるため、午後問題は初期化時に対象外として例外を出す。（問題数がない場合）
+    午後問題は別スコープで対応する。
+    """
+
     _period: Period
     _section: Section
     _quiz_count: int
@@ -43,9 +48,12 @@ class CreateQuiz:
         self._period = period
         self._section = section
 
-    def execute(self, page_range: PageRange) -> None:
+    def execute(self, page_range: PageRange) -> list[int]:
         """
         公式過去問題のPDFから問題を抽出し、Quizデータを作成する。
+
+        Returns:
+            draft_numbers: 画像配置が必要な問題番号のリスト
         """
 
         ## マークダウン化した問題テキストを取得
@@ -58,24 +66,28 @@ class CreateQuiz:
         with Session(engine) as session:
             exam_id = ExamRepository(session).get_exam_id(self._period, self._section)
 
-            QuizRepository(session).add_all(
-                [
-                    Quiz(
-                        exam_id=exam_id,
-                        number=quiz.number,
-                        content=quiz.content,
-                        correct_option=QuizOption(
-                            correct_option_dict[quiz.number]
-                        ).code,
-                        status=QuizStatus.DRAFT.value
-                        if quiz.has_image
-                        else QuizStatus.IN_REVIEW.value,
-                    )
-                    for quiz in parsed_quiz_list.quizzes
-                ]
+            quizzes = [
+                Quiz(
+                    exam_id=exam_id,
+                    number=quiz.number,
+                    content=quiz.content,
+                    correct_option=QuizOption(correct_option_dict[quiz.number]).code,
+                    status=QuizStatus.DRAFT.value
+                    if quiz.has_image
+                    else QuizStatus.IN_REVIEW.value,
+                )
+                for quiz in parsed_quiz_list.quizzes
+            ]
+
+            QuizRepository(session).add_all(quizzes)
+
+            draft_numbers = sorted(
+                quiz.number for quiz in quizzes if quiz.status == QuizStatus.DRAFT.value
             )
 
             session.commit()
+
+        return draft_numbers
 
     def _get_parsed_quizzes(self, page_range: PageRange) -> ParsedQuizList:
         ## ClaudeAPIでPDFから問題文を生成する。

@@ -9,8 +9,8 @@ from values.page_range import PageRange
 
 def main() -> None:
     """
-    試験年度、試験区分を選択し、問題のpdfを作成します。
-    作成されたPDFは一時フォルダに作成されます。
+    試験年度と試験区分、ページ範囲を受け取り、問題のpdfを一時フォルダに作成する。
+    create_quizを使用する際にClaudeAPIに渡すPDFデータを確認する用途で使用する。
     """
 
     parser = argparse.ArgumentParser(
